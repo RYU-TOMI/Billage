@@ -23,7 +23,7 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
 
     private static final String ERROR_CODE = "social_login_failed";
 
-    private final OAuth2Properties oAuth2Properties;
+    private final OAuth2RedirectUriResolver redirectUriResolver;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
@@ -32,7 +32,7 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
 
         log.warn("카카오 로그인 실패: {}", exception.getMessage());
 
-        String targetUrl = UriComponentsBuilder.fromUriString(oAuth2Properties.redirectUri())
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUriResolver.resolve(request))
                 .queryParam("error", ERROR_CODE)
                 .build()
                 .toUriString();
