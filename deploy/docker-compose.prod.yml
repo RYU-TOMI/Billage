@@ -1,0 +1,74 @@
+# EC2 배포용 구성.
+#
+#   caddy  : 80/443 수신, HTTPS 인증서 자동 발급·갱신, app 으로 프록시
+#   app    : Spring Boot. 이미지를 서버에서 빌드하지 않고, 로컬에서 만든 jar 를 마운트해서 실행
+#            (t3.small 메모리로는 Gradle 빌드가 죽습니다)
+#   mysql  : 같은 인스턴스에서 구동. 데이터는 named volume 에 보존
+#
+# 비밀값은 같은 디렉터리의 .env.prod 에서 읽습니다. (저장소에 커밋하지 않음)
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: billage-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: billage
+      MYSQL_USER: billage
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  app:
+    image: eclipse-temurin:21-jre
+    container_name: billage-app
+    working_dir: /app
+    volumes:
+      - ./app.jar:/app/app.jar:ro
+    # 메모리 1.9GB 를 MySQL 과 나눠 쓰므로 힙을 제한합니다.
+    command: ["java", "-Xmx512m", "-jar", "/app/app.jar"]
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://mysql:3306/billage?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      DB_USERNAME: billage
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      TZ: Asia/Seoul
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    container_name: billage-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data      # 발급받은 인증서 보관. 지우면 재발급됩니다
+      - caddy-config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  caddy-data:
+  caddy-config:
