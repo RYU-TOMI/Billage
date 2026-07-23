@@ -256,6 +256,25 @@ src/main/java/com/billage/
 
 > 서버(t3.small)에서 Gradle 빌드를 돌리면 메모리 부족으로 죽기 때문에 **빌드는 항상 로컬에서** 합니다.
 
+### 업로드 이미지 저장
+
+업로드된 이미지는 **서버 로컬 디스크**에 저장하고 Spring 이 `/images/**` 로 서빙합니다.
+
+```
+저장  {app.upload.dir}/abc.jpg     운영: /data/uploads (docker named volume)
+조회  https://api.billage.site/images/abc.jpg
+```
+
+- 단일 인스턴스 운영이라 로컬 저장으로 충분합니다. S3 는 서버를 여러 대로 늘릴 때 필요합니다
+- **`uploads-data` named volume 이 반드시 붙어 있어야 합니다.** 없으면 재배포로 컨테이너가
+  새로 뜰 때마다 업로드된 이미지가 전부 사라집니다 (`mysql-data` 와 같은 이유)
+- `/images/**` 는 인증 예외입니다. `<img src>` 는 `Authorization` 헤더를 보낼 수 없습니다
+- 인스턴스를 종료하면 볼륨도 사라집니다 (MySQL 과 동일한 제약)
+
+> ⚠️ **업로드 API 를 구현할 때 확장자를 반드시 화이트리스트로 제한하세요.**
+> `.html` 을 업로드하면 `text/html` 로 서빙되어 저장형 XSS 가 됩니다.
+> `jpg`/`jpeg`/`png`/`webp`/`gif` 정도만 허용하고, 파일명은 서버가 새로 생성하는 게 안전합니다.
+
 ### 운영 환경변수
 
 `/opt/billage/.env.prod` 에 있습니다. (권한 600, 저장소에 없음)
@@ -267,6 +286,7 @@ src/main/java/com/billage/
 | `KAKAO_CLIENT_ID` / `KAKAO_CLIENT_SECRET` | 카카오 발급값 |
 | `OAUTH2_REDIRECT_URI` | 로그인 후 돌아갈 프론트 주소 |
 | `CORS_ALLOWED_ORIGINS` | 허용 출처. 와일드카드(`*`) 사용 가능 |
+| `UPLOAD_DIR` | 업로드 이미지 저장 경로 (운영: `/data/uploads`) |
 
 > **`server.forward-headers-strategy: framework`** (`application-prod.yml`) 는 지우면 안 됩니다.
 > Caddy 가 HTTPS 를 종료하기 때문에, 이게 없으면 Spring 이 자기 주소를 `http` 로 인식해
