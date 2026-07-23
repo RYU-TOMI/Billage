@@ -10,7 +10,50 @@ Billage는 대학생을 위한 생활 공유 플랫폼입니다.
 
 ## 기술 스택
 
-확정되는 대로 추가 예정입니다.
+| 구분 | 사용 기술 |
+| --- | --- |
+| 언어 | Java 21 |
+| 프레임워크 | Spring Boot 4.1.0 |
+| 빌드 도구 | Gradle (Wrapper 포함) |
+| ORM | Spring Data JPA |
+| DB | MySQL (운영) / H2 (로컬) |
+| 기타 | Lombok, Bean Validation |
+
+> ⚠️ Spring Boot **4.x** 입니다. 3.x와 의존성 이름이 다릅니다 (`spring-boot-starter-web` → `spring-boot-starter-webmvc`). 튜토리얼의 `build.gradle`을 그대로 복사하지 마세요.
+
+## 프로젝트 구조
+
+```
+src/main/java/com/billage/
+├── BillageApplication.java
+└── global/
+    ├── common/
+    │   ├── response/ApiResponse.java      공통 응답 포맷
+    │   ├── entity/BaseTimeEntity.java     created_at / updated_at 자동 관리
+    │   └── controller/HealthController.java
+    ├── config/JpaAuditingConfig.java
+    └── exception/
+        ├── ErrorCode.java                 에러 코드 enum
+        ├── BusinessException.java
+        └── GlobalExceptionHandler.java
+```
+
+도메인 코드는 `com.billage.domain.*` 아래에 추가합니다.
+
+## 공통 응답 포맷
+
+모든 API는 아래 형식으로 응답합니다.
+
+```json
+// 성공
+{ "success": true, "data": { }, "error": null }
+
+// 실패
+{ "success": false, "data": null, "error": { "code": "POST_NOT_FOUND", "message": "게시글을 찾을 수 없습니다." } }
+```
+
+서비스 로직에서 `throw new BusinessException(ErrorCode.POST_NOT_FOUND)` 를 던지면
+`GlobalExceptionHandler`가 위 형식과 알맞은 HTTP 상태 코드로 변환합니다.
 
 ## 주요 기능
 
@@ -41,7 +84,29 @@ chore: 빌드, 설정 등 기타 변경
 
 ## 시작하기
 
+JDK 21만 설치되어 있으면 됩니다. Gradle과 DB는 따로 설치하지 않아도 됩니다.
+
 ```bash
 git clone https://github.com/RYU-TOMI/Billage.git
 cd Billage
+./gradlew bootRun          # Windows: gradlew.bat bootRun
 ```
+
+기본 프로필은 `local`이며 H2 인메모리 DB로 실행됩니다.
+
+- 서버: http://localhost:8080
+- 헬스체크: http://localhost:8080/api/health
+- H2 콘솔: http://localhost:8080/h2-console
+  (JDBC URL `jdbc:h2:mem:billage;MODE=MySQL;DB_CLOSE_DELAY=-1`, User `sa`, 비밀번호 없음)
+
+### MySQL로 실행하기
+
+```bash
+DB_URL=jdbc:mysql://localhost:3306/billage \
+DB_USERNAME=root \
+DB_PASSWORD=password \
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+> DB 비밀번호, JWT 시크릿 등은 **절대 커밋하지 마세요.** 공개 저장소입니다.
+> 환경변수로 주입하거나 `application-secret.yml`(gitignore 처리됨)에 두세요.
