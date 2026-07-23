@@ -93,6 +93,28 @@ String accessToken = jwtTokenProvider.createAccessToken(user.getId());
 String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 ```
 
+**카카오 로그인 흐름**
+
+```
+프론트 → GET /oauth2/authorization/kakao
+       → 카카오 인증 화면
+       → GET /login/oauth2/code/kakao?code=...   (서버가 처리)
+       → {OAUTH2_REDIRECT_URI}?accessToken=...   (성공)
+       → {OAUTH2_REDIRECT_URI}?error=social_login_failed   (실패)
+```
+
+카카오 개발자센터에서 발급받은 값을 환경변수로 넣어야 실제 로그인이 됩니다.
+
+```bash
+KAKAO_CLIENT_ID=...        # REST API 키
+KAKAO_CLIENT_SECRET=...    # 보안 > Client Secret
+OAUTH2_REDIRECT_URI=http://localhost:5173/oauth/callback
+```
+
+카카오 개발자센터에 **Redirect URI 를 `http://localhost:8080/login/oauth2/code/kakao` 로 등록**해야 하고,
+동의항목(`profile_nickname`, `profile_image`, `account_email`)도 활성화해야 합니다.
+`account_email` 은 선택 동의라 사용자가 거부하면 이메일이 넘어오지 않습니다.
+
 인증 없이 열어야 할 경로가 생기면 `SecurityConfig.PUBLIC_ENDPOINTS` 에 추가하세요.
 
 > `jwt.secret` 의 기본값은 **로컬 개발 전용**입니다. 배포 시 반드시 환경변수 `JWT_SECRET` 으로 덮어쓰세요.
