@@ -50,11 +50,11 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("유효한 토큰이면 인증을 통과한다 (아직 핸들러가 없어 404 가 나오는 것이 정상)")
+    @DisplayName("유효한 토큰이면 인증을 통과한다 (핸들러가 없는 경로라 404 가 나오는 것이 정상)")
     void protectedEndpoint_withValidToken() throws Exception {
         String token = jwtTokenProvider.createAccessToken(1L);
 
-        mockMvc.perform(get("/api/posts").header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/no-such-endpoint").header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
     }

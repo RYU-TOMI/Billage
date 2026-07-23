@@ -44,11 +44,20 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private PostType type;
 
+    /** 글쓴이가 빌려주는 입장(LEND)인지 빌리고 싶은 입장(BORROW)인지. 화면 표시/필터링 용도. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PostDirection direction;
+
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    /** 거래 지역 (예: "홍익대학교 정문") */
+    @Column(nullable = false)
+    private String location;
 
     @Column(nullable = false)
     private Integer price;
@@ -62,40 +71,47 @@ public class Post extends BaseTimeEntity {
 
     private LocalDateTime deadline;
 
-    private String rentalPeriod;
-
     @Column(nullable = false)
     private String imageUrl;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Post(User writer, PostCategory category, PostType type, String title, String content,
-                 Integer price, Integer capacity, LocalDateTime deadline, String rentalPeriod, String imageUrl) {
+    private Post(User writer, PostCategory category, PostType type, PostDirection direction, String title,
+                 String content, String location, Integer price, Integer capacity, LocalDateTime deadline,
+                 String imageUrl) {
         this.writer = writer;
         this.category = category;
         this.type = type;
+        this.direction = direction;
         this.title = title;
         this.content = content;
+        this.location = location;
         this.price = price;
         this.status = PostStatus.OPEN;
         this.capacity = capacity;
         this.deadline = deadline;
-        this.rentalPeriod = rentalPeriod;
         this.imageUrl = imageUrl;
     }
 
-    public static Post create(User writer, PostCategory category, PostType type, String title, String content,
-                               Integer price, Integer capacity, LocalDateTime deadline, String rentalPeriod, String imageUrl) {
+    public static Post create(User writer, PostCategory category, PostType type, PostDirection direction,
+                               String title, String content, String location, Integer price, Integer capacity,
+                               LocalDateTime deadline, String imageUrl) {
         return Post.builder()
                 .writer(writer)
                 .category(category)
                 .type(type)
+                .direction(direction)
                 .title(title)
                 .content(content)
+                .location(location)
                 .price(price)
                 .capacity(capacity)
                 .deadline(deadline)
-                .rentalPeriod(rentalPeriod)
                 .imageUrl(imageUrl)
                 .build();
+    }
+
+    /** 정원이 다 찼을 때 호출합니다. (Join API에서 사용) */
+    public void close() {
+        this.status = PostStatus.CLOSED;
     }
 }
