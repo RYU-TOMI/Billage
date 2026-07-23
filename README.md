@@ -115,9 +115,21 @@ KAKAO_CLIENT_SECRET=...    # 보안 > Client Secret
 OAUTH2_REDIRECT_URI=http://localhost:5173/oauth/callback
 ```
 
-카카오 개발자센터에 **Redirect URI 를 `http://localhost:8080/login/oauth2/code/kakao` 로 등록**해야 하고,
-동의항목(`profile_nickname`, `profile_image`, `account_email`)도 활성화해야 합니다.
-`account_email` 은 선택 동의라 사용자가 거부하면 이메일이 넘어오지 않습니다.
+카카오 개발자센터에 **Redirect URI 를 `http://localhost:8080/login/oauth2/code/kakao` 로 등록**해야 합니다.
+
+**동의항목**은 `profile_nickname`, `profile_image` 만 요청합니다.
+`account_email` 은 일반 개발자 계정에서 설정할 수 없어 제외했습니다 — 넣으면 로그인 시 **KOE205** 가 납니다.
+그래서 **`User.email` 은 항상 `null`** 입니다. 비즈니스 앱으로 전환하면 아래처럼 되돌릴 수 있습니다.
+
+```bash
+KAKAO_SCOPE=profile_nickname,profile_image,account_email
+```
+
+`.env` 에 키를 넣어뒀다면 Spring Boot 는 `.env` 를 자동으로 읽지 않으므로 셸에서 주입해야 합니다.
+
+```bash
+set -a && . ./.env && set +a && ./gradlew bootRun
+```
 
 인증 없이 열어야 할 경로가 생기면 `SecurityConfig.PUBLIC_ENDPOINTS` 에 추가하세요.
 

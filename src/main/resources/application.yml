@@ -30,12 +30,14 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
-            # 동의항목은 카카오 개발자센터에서 먼저 활성화해야 합니다.
-            # account_email 은 선택 동의라 사용자가 거부하면 이메일이 넘어오지 않습니다.
-            scope:
-              - profile_nickname
-              - profile_image
-              - account_email
+            # 카카오 개발자센터 > 카카오 로그인 > 동의항목 에서 켜둔 항목만 넣을 수 있습니다.
+            # 설정하지 않은 항목을 넣으면 로그인 시점에 KOE205 가 납니다.
+            #
+            # account_email 은 일반 개발자 계정에서는 설정할 수 없어 기본값에서 뺐습니다.
+            # (비즈니스 앱으로 전환하면 사용 가능 → 그때 KAKAO_SCOPE 환경변수로 추가하세요)
+            #   KAKAO_SCOPE=profile_nickname,profile_image,account_email
+            # 이메일을 못 받으면 User.email 은 null 로 저장됩니다. (설계상 허용)
+            scope: ${KAKAO_SCOPE:profile_nickname,profile_image}
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
