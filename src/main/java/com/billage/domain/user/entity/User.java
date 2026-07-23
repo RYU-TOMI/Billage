@@ -37,13 +37,23 @@ public class User extends BaseTimeEntity {
 
     private String school;
 
-    @Builder
-    public User(String email, String socialId, String nickname, String profileImage, String school) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private User(String email, String socialId, String nickname, String profileImage, String school) {
         this.email = email;
         this.socialId = socialId;
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.credit = 0;
         this.school = school;
+    }
+
+    public static User create(String email, String socialId, String nickname, String profileImage, String school) {
+        return User.builder()
+                .email(email)
+                .socialId(socialId)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .school(school)
+                .build();
     }
 }
