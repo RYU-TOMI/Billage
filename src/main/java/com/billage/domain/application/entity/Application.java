@@ -44,10 +44,17 @@ public class Application extends BaseTimeEntity {
     @Column(nullable = false)
     private ApplicationStatus status;
 
-    @Builder
-    public Application(Post post, User applicant) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private Application(Post post, User applicant) {
         this.post = post;
         this.applicant = applicant;
         this.status = ApplicationStatus.CONFIRMED;
+    }
+
+    public static Application create(Post post, User applicant) {
+        return Application.builder()
+                .post(post)
+                .applicant(applicant)
+                .build();
     }
 }

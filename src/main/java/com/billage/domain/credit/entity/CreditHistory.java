@@ -47,11 +47,20 @@ public class CreditHistory extends BaseTimeEntity {
     @Column(nullable = false)
     private CreditReason reason;
 
-    @Builder
-    public CreditHistory(User user, Post relatedPost, Integer amount, CreditReason reason) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private CreditHistory(User user, Post relatedPost, Integer amount, CreditReason reason) {
         this.user = user;
         this.relatedPost = relatedPost;
         this.amount = amount;
         this.reason = reason;
+    }
+
+    public static CreditHistory create(User user, Post relatedPost, Integer amount, CreditReason reason) {
+        return CreditHistory.builder()
+                .user(user)
+                .relatedPost(relatedPost)
+                .amount(amount)
+                .reason(reason)
+                .build();
     }
 }

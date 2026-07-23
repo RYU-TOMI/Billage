@@ -67,9 +67,9 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private String imageUrl;
 
-    @Builder
-    public Post(User writer, PostCategory category, PostType type, String title, String content,
-                Integer price, Integer capacity, LocalDateTime deadline, String rentalPeriod, String imageUrl) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private Post(User writer, PostCategory category, PostType type, String title, String content,
+                 Integer price, Integer capacity, LocalDateTime deadline, String rentalPeriod, String imageUrl) {
         this.writer = writer;
         this.category = category;
         this.type = type;
@@ -81,5 +81,21 @@ public class Post extends BaseTimeEntity {
         this.deadline = deadline;
         this.rentalPeriod = rentalPeriod;
         this.imageUrl = imageUrl;
+    }
+
+    public static Post create(User writer, PostCategory category, PostType type, String title, String content,
+                               Integer price, Integer capacity, LocalDateTime deadline, String rentalPeriod, String imageUrl) {
+        return Post.builder()
+                .writer(writer)
+                .category(category)
+                .type(type)
+                .title(title)
+                .content(content)
+                .price(price)
+                .capacity(capacity)
+                .deadline(deadline)
+                .rentalPeriod(rentalPeriod)
+                .imageUrl(imageUrl)
+                .build();
     }
 }
