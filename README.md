@@ -229,10 +229,11 @@ docker run -p 8080:8080 --env-file .env.prod billage
 - [ ] `JWT_SECRET` 을 로컬 기본값이 아닌 값으로 교체
 - [ ] `CORS_ALLOWED_ORIGINS` 에 실제 프론트 주소 지정
 
-> **Web 플랫폼(사이트 도메인) 등록은 필수가 아닙니다.**
+> **웹 도메인 등록은 필수가 아닙니다.**
 > 서버가 리다이렉트로 처리하는 방식이라 Redirect URI 등록만으로 로그인이 동작합니다.
 > 프론트에서 카카오 JS SDK(공유하기·지도 등)를 쓰게 되면 그때
-> *앱 설정 > 플랫폼 > Web 플랫폼 등록* 에서 사이트 도메인을 추가하세요.
+> *앱 설정 > 앱 > 제품 링크 관리 > 웹 도메인* 에서 추가하세요.
+> (구버전 콘솔의 *플랫폼 > Web 플랫폼 등록* 이 이 메뉴로 바뀌었습니다)
 
 > **HTTPS 를 프록시(Nginx·로드밸런서·PaaS)가 처리한다면** `prod` 프로필의
 > `server.forward-headers-strategy: framework` 가 반드시 필요합니다.
