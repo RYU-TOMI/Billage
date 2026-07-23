@@ -40,7 +40,9 @@ public class CreditService {
             throw new BusinessException(ErrorCode.INVALID_CHARGE_AMOUNT);
         }
 
-        User user = getUser(userId);
+        // 충전도 동시 요청 시 정합성을 위해 비관적 락으로 조회한다.
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         user.increaseCredit(request.amount());
         creditHistoryRepository.save(
                 CreditHistory.create(user, null, request.amount(), CreditReason.CHARGE)

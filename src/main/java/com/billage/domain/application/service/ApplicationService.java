@@ -41,7 +41,8 @@ public class ApplicationService {
     public ApplicationResponse join(Long postId, Long userId, JoinRequest request) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
-        User applicant = userRepository.findById(userId)
+        // 잔액 체크와 차감 사이의 race condition을 막기 위해 신청자 row에 비관적 락을 건다.
+        User applicant = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (post.getWriter().getId().equals(userId)) {
@@ -117,10 +118,14 @@ public class ApplicationService {
         Post post = application.getPost();
         int refundAmount = application.getTotalPrice();
 
+        // 환불 증액도 동시 요청에 안전하도록 신청자 row에 비관적 락을 걸고 처리한다.
+        User lockedApplicant = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         application.cancel();
-        applicant.increaseCredit(refundAmount);
+        lockedApplicant.increaseCredit(refundAmount);
         creditHistoryRepository.save(
-                CreditHistory.create(applicant, post, refundAmount, CreditReason.REFUND)
+                CreditHistory.create(lockedApplicant, post, refundAmount, CreditReason.REFUND)
         );
 
         // 정원이 찬 뒤 취소되면 자리가 하나 생기므로 다시 모집 상태로 되돌린다.
