@@ -123,6 +123,9 @@ public class ApplicationService {
                 CreditHistory.create(applicant, post, refundAmount, CreditReason.REFUND)
         );
 
+        // 정원이 찬 뒤 취소되면 자리가 하나 생기므로 다시 모집 상태로 되돌린다.
+        post.open();
+
         return ApplicationCancelResponse.of(application, refundAmount);
     }
 }
