@@ -62,6 +62,8 @@ public enum ErrorCode {
     /** 게시글이 CLOSED 이거나 확정 인원이 capacity 에 도달한 경우 */
     CAPACITY_EXCEEDED(HttpStatus.CONFLICT, "이미 마감된 게시글입니다."),
     ALREADY_CANCELED(HttpStatus.CONFLICT, "이미 취소된 참여 내역입니다."),
+    /** RENTAL 타입 참여인데 rentalDays 가 없거나 1보다 작은 경우 */
+    VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다."),
 
     // --- 아래 3개는 참여 로직 검증 추가 여부가 확정되면 사용합니다 ---
     ALREADY_APPLIED(HttpStatus.CONFLICT, "이미 참여한 게시글입니다."),
