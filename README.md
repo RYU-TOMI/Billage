@@ -223,12 +223,16 @@ docker run -p 8080:8080 --env-file .env.prod billage
 
 ### 배포 전 체크리스트
 
-- [ ] 카카오 개발자센터 > **Redirect URI 에 배포 주소 추가**
+- [ ] 카카오 개발자센터 > **제품 설정 > 카카오 로그인 > Redirect URI 에 배포 주소 추가**
       → `https://api.billage.site/login/oauth2/code/kakao`
       (로컬용 `http://localhost:8080/...` 은 남겨두세요)
-- [ ] 카카오 개발자센터 > 플랫폼 > Web 에 사이트 도메인 등록
 - [ ] `JWT_SECRET` 을 로컬 기본값이 아닌 값으로 교체
 - [ ] `CORS_ALLOWED_ORIGINS` 에 실제 프론트 주소 지정
+
+> **Web 플랫폼(사이트 도메인) 등록은 필수가 아닙니다.**
+> 서버가 리다이렉트로 처리하는 방식이라 Redirect URI 등록만으로 로그인이 동작합니다.
+> 프론트에서 카카오 JS SDK(공유하기·지도 등)를 쓰게 되면 그때
+> *앱 설정 > 플랫폼 > Web 플랫폼 등록* 에서 사이트 도메인을 추가하세요.
 
 > **HTTPS 를 프록시(Nginx·로드밸런서·PaaS)가 처리한다면** `prod` 프로필의
 > `server.forward-headers-strategy: framework` 가 반드시 필요합니다.
