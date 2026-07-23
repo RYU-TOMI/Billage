@@ -44,7 +44,7 @@ public enum ErrorCode {
 
     // ===== Credit =====
     INSUFFICIENT_CREDIT(HttpStatus.CONFLICT, "크레딧이 부족합니다."),
-    INVALID_CHARGE_AMOUNT(HttpStatus.BAD_REQUEST, "충전 금액은 0보다 커야 합니다."),
+    INVALID_CHARGE_AMOUNT(HttpStatus.BAD_REQUEST, "충전 금액은 1000/2000/3000/5000/7000/10000 중 하나여야 합니다."),
 
     // ===== Post =====
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),

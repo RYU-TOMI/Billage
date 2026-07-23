@@ -13,6 +13,7 @@ import com.billage.domain.user.repository.UserRepository;
 import com.billage.global.common.response.PageResponse;
 import com.billage.global.exception.BusinessException;
 import com.billage.global.exception.ErrorCode;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CreditService {
 
+    /** 충전 화면 프리셋 버튼과 동일한 값만 허용합니다. */
+    private static final Set<Integer> ALLOWED_CHARGE_AMOUNTS = Set.of(1_000, 2_000, 3_000, 5_000, 7_000, 10_000);
+
     private final UserRepository userRepository;
     private final CreditHistoryRepository creditHistoryRepository;
 
@@ -33,10 +37,10 @@ public class CreditService {
         return CreditResponse.from(user.getCredit());
     }
 
-    /** POST /api/users/me/credit/charge 크레딧 충전시 음수거나 0이면 오류 */
+    /** POST /api/users/me/credit/charge 충전 화면 프리셋 금액(1000~10000)만 허용합니다 */
     @Transactional
     public CreditResponse charge(Long userId, CreditChargeRequest request) {
-        if (request.amount() == null || request.amount() <= 0) {
+        if (request.amount() == null || !ALLOWED_CHARGE_AMOUNTS.contains(request.amount())) {
             throw new BusinessException(ErrorCode.INVALID_CHARGE_AMOUNT);
         }
 
