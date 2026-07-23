@@ -63,4 +63,32 @@ public class CreditHistory extends BaseTimeEntity {
                 .reason(reason)
                 .build();
     }
+
+
+    public static CreditHistory ofCharge(User user, int amount) {
+        return CreditHistory.builder()
+                .user(user)
+                .relatedPost(null)
+                .amount(amount)
+                .reason(CreditReason.CHARGE)
+                .build();
+    }
+
+    public static CreditHistory ofPayment(User user, Post post, int amount) {
+        return CreditHistory.builder()
+                .user(user)
+                .relatedPost(post)
+                .amount(-Math.abs(amount))
+                .reason(CreditReason.PAYMENT)
+                .build();
+    }
+
+    public static CreditHistory ofRefund(User user, Post post, int amount) {
+        return CreditHistory.builder()
+                .user(user)
+                .relatedPost(post)
+                .amount(Math.abs(amount))
+                .reason(CreditReason.REFUND)
+                .build();
+    }
 }

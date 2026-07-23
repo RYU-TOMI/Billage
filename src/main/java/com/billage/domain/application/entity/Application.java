@@ -13,17 +13,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * 승인 단계 없이 신청 즉시 CONFIRMED 로 생성됩니다.
- */
+
+
 @Entity
-@Table(name = "applications")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Application extends BaseTimeEntity {
@@ -44,6 +41,7 @@ public class Application extends BaseTimeEntity {
     @Column(nullable = false)
     private ApplicationStatus status;
 
+    // ↓↓↓ 여기 추가 (필드 선언 끝난 직후)
     @Builder(access = AccessLevel.PRIVATE)
     private Application(Post post, User applicant) {
         this.post = post;
@@ -56,5 +54,9 @@ public class Application extends BaseTimeEntity {
                 .post(post)
                 .applicant(applicant)
                 .build();
+    }
+
+    public void cancel() {
+        this.status = ApplicationStatus.CANCELED;
     }
 }
