@@ -1,0 +1,17 @@
+# 로컬 개발용 - 인메모리 H2. 별도 DB 설치 없이 바로 실행됩니다.
+# H2 콘솔: http://localhost:8080/h2-console (JDBC URL 은 아래 url 값 그대로 입력)
+spring:
+  datasource:
+    url: jdbc:h2:mem:billage;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

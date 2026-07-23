@@ -1,0 +1,14 @@
+# 공용 개발 서버용 - MySQL.
+# 접속 정보는 코드에 넣지 말고 환경변수로 주입하세요.
+#   DB_URL=jdbc:mysql://localhost:3306/billage?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#   DB_USERNAME=... / DB_PASSWORD=...
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
