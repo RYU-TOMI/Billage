@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 업로드된 이미지를 {@code upload.dir} 경로에 저장합니다. 저장된 파일은
- * {@link com.billage.global.config.WebConfig} 가 {@code /images/**} 로 정적 서빙합니다.
+ * 업로드된 이미지를 {@code app.upload.dir} 경로에 저장합니다. 저장된 파일은
+ * {@link com.billage.global.config.StaticResourceConfig} 가 {@code /images/**} 로 정적 서빙합니다.
  */
 @Slf4j
 @Service
@@ -25,7 +25,7 @@ public class ImageService {
 
     private final Path uploadDir;
 
-    public ImageService(@Value("${upload.dir}") String uploadDir) {
+    public ImageService(@Value("${app.upload.dir}") String uploadDir) {
         this.uploadDir = Path.of(uploadDir);
         try {
             Files.createDirectories(this.uploadDir);
