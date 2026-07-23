@@ -41,5 +41,10 @@ out/
 application-secret.yml
 application-local-*.yml
 .env
+.env.prod
 *.log
+
+# SSH 키 / 배포 시크릿
+*.pem
+*.key
 

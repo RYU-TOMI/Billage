@@ -12,6 +12,10 @@ import java.util.List;
 /**
  * 프론트엔드 연동을 위한 CORS 설정.
  * 허용 주소는 application.yml 의 {@code cors.allowed-origins} 에서 관리합니다.
+ *
+ * <p>정확히 일치하는 주소 대신 <b>패턴</b>으로 등록합니다.
+ * Vercel 은 브랜치·커밋마다 {@code billage-git-xxx.vercel.app} 같은 프리뷰 주소를 새로 만드는데,
+ * 정확히 일치하는 주소만 허용하면 프리뷰 배포에서 API 호출이 전부 CORS 로 막힙니다.
  */
 @Configuration
 public class CorsConfig {
@@ -23,7 +27,7 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));

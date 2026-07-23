@@ -1,0 +1,12 @@
+# 도메인만 적으면 Caddy 가 Let's Encrypt 인증서를 자동으로 발급하고 갱신합니다.
+# 발급 조건: api.billage.site 의 A 레코드가 이 서버를 가리키고 80/443 이 열려 있어야 합니다.
+#
+# X-Forwarded-Proto / X-Forwarded-Host 는 Caddy 가 기본으로 붙여줍니다.
+# Spring 쪽에서는 prod 프로필의 server.forward-headers-strategy: framework 가 이 헤더를 읽습니다.
+# 그래야 카카오에 보내는 redirect_uri 가 https 로 만들어집니다.
+api.billage.site {
+	reverse_proxy app:8080
+
+	encode gzip
+	log
+}
