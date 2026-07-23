@@ -68,6 +68,9 @@ src/main/java/com/billage/
 
 ## 인증
 
+로그인은 **카카오 OAuth2 단독**입니다. 자체 회원가입(이메일·비밀번호)은 없습니다.
+카카오 인증을 마치면 서버가 자체 JWT를 발급하고, 이후 요청은 이 JWT로 인증합니다.
+
 `/api/auth/**` 와 `/api/health` 를 제외한 모든 API는 인증이 필요합니다.
 요청 헤더에 `Authorization: Bearer {accessToken}` 을 담아 보내면 됩니다.
 
@@ -82,6 +85,8 @@ public ApiResponse<List<PostResponse>> myPosts(@AuthenticationPrincipal AuthUser
 ```
 
 **토큰 발급** (로그인 담당자용)
+
+카카오 인증으로 사용자를 찾거나 새로 만든 뒤, 그 유저 id로 토큰을 발급합니다.
 
 ```java
 String accessToken = jwtTokenProvider.createAccessToken(user.getId());

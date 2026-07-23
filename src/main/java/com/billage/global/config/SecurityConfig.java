@@ -12,8 +12,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -35,7 +33,7 @@ public class SecurityConfig {
      */
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/health",
-            "/api/auth/**",          // 회원가입, 로그인, 이메일 인증, 토큰 재발급
+            "/api/auth/**",          // 카카오 로그인, 토큰 재발급
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
@@ -71,11 +69,5 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    /** 비밀번호 암호화. 회원가입 · 로그인 담당자가 주입받아 사용하세요. */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
