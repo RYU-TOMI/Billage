@@ -64,9 +64,26 @@ public class JwtTokenProvider {
         return Long.valueOf(parseClaims(token).getSubject());
     }
 
+    /**
+     * 액세스 토큰인지 확인합니다. API 인증에는 액세스 토큰만 허용해야 합니다.
+     * type 클레임이 없는 토큰도 액세스 토큰으로 인정하지 않습니다.
+     */
+    public boolean isAccessToken(String token) {
+        return ACCESS_TOKEN.equals(getTokenType(token));
+    }
+
     /** 리프레시 토큰인지 확인합니다. 토큰 재발급 API 에서 사용하세요. */
     public boolean isRefreshToken(String token) {
-        return REFRESH_TOKEN.equals(parseClaims(token).get(TOKEN_TYPE_CLAIM, String.class));
+        return REFRESH_TOKEN.equals(getTokenType(token));
+    }
+
+    /** 유효하지 않은 토큰이면 null 을 돌려줍니다. (예외를 던지지 않습니다) */
+    private String getTokenType(String token) {
+        try {
+            return parseClaims(token).get(TOKEN_TYPE_CLAIM, String.class);
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**

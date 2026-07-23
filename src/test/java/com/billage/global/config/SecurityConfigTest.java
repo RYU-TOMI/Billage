@@ -60,6 +60,16 @@ class SecurityConfigTest {
     }
 
     @Test
+    @DisplayName("리프레시 토큰으로는 API 인증을 통과할 수 없다")
+    void protectedEndpoint_withRefreshToken() throws Exception {
+        String refreshToken = jwtTokenProvider.createRefreshToken(1L);
+
+        mockMvc.perform(get("/api/posts").header("Authorization", "Bearer " + refreshToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
     @DisplayName("Swagger 문서는 토큰 없이 열린다")
     void swagger_withoutToken() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))

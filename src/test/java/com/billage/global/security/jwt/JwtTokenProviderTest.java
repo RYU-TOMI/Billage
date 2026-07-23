@@ -26,8 +26,21 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("액세스 토큰과 리프레시 토큰이 구분된다")
     void distinguishTokenType() {
-        assertThat(provider.isRefreshToken(provider.createAccessToken(1L))).isFalse();
-        assertThat(provider.isRefreshToken(provider.createRefreshToken(1L))).isTrue();
+        String accessToken = provider.createAccessToken(1L);
+        String refreshToken = provider.createRefreshToken(1L);
+
+        assertThat(provider.isAccessToken(accessToken)).isTrue();
+        assertThat(provider.isRefreshToken(accessToken)).isFalse();
+
+        assertThat(provider.isAccessToken(refreshToken)).isFalse();
+        assertThat(provider.isRefreshToken(refreshToken)).isTrue();
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 토큰의 타입 판별은 예외 없이 false 를 돌려준다")
+    void tokenType_invalidToken() {
+        assertThat(provider.isAccessToken("not.a.token")).isFalse();
+        assertThat(provider.isRefreshToken("not.a.token")).isFalse();
     }
 
     @Test
