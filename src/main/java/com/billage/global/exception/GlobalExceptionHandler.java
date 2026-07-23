@@ -13,6 +13,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
@@ -76,6 +77,14 @@ public class GlobalExceptionHandler {
         log.warn(message);
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus())
                 .body(ApiResponse.error(ErrorCode.INVALID_REQUEST, message));
+    }
+
+    /** 업로드 파일이 multipart 상한(application.yml 의 max-file-size)을 넘은 경우 */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException e) {
+        log.warn("업로드 파일이 너무 큽니다: {}", e.getMessage());
+        return ResponseEntity.status(ErrorCode.INVALID_IMAGE_FILE.getStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_IMAGE_FILE, "파일 크기가 너무 큽니다."));
     }
 
     /** 지원하지 않는 HTTP 메서드 */
