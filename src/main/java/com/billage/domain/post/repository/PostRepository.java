@@ -18,6 +18,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             """)
     Page<Post> findAllByFilter(@Param("type") PostType type, @Param("category") PostCategory category, Pageable pageable);
 
-    Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-            String titleKeyword, String contentKeyword, Pageable pageable);
+    @Query("""
+            select p from Post p
+            where (lower(p.title) like lower(concat('%', :keyword, '%'))
+                   or lower(p.content) like lower(concat('%', :keyword, '%')))
+            and (:type is null or p.type = :type)
+            and (:category is null or p.category = :category)
+            """)
+    Page<Post> search(@Param("keyword") String keyword, @Param("type") PostType type,
+                       @Param("category") PostCategory category, Pageable pageable);
 }
