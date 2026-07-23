@@ -62,11 +62,11 @@ public enum ErrorCode {
     /** 게시글이 CLOSED 이거나 확정 인원이 capacity 에 도달한 경우 */
     CAPACITY_EXCEEDED(HttpStatus.CONFLICT, "이미 마감된 게시글입니다."),
     ALREADY_CANCELED(HttpStatus.CONFLICT, "이미 취소된 참여 내역입니다."),
-
-    // --- 아래 3개는 참여 로직 검증 추가 여부가 확정되면 사용합니다 ---
     ALREADY_APPLIED(HttpStatus.CONFLICT, "이미 참여한 게시글입니다."),
     WRITER_CANNOT_APPLY(HttpStatus.BAD_REQUEST, "작성자는 본인 게시글에 참여할 수 없습니다."),
-    DEADLINE_PASSED(HttpStatus.CONFLICT, "모집 기간이 종료되었습니다.");
+    DEADLINE_PASSED(HttpStatus.CONFLICT, "모집 기간이 종료되었습니다."),
+    /** RENTAL 타입 참여인데 rentalDays 가 없거나 1보다 작은 경우 */
+    RENTAL_DAYS_REQUIRED(HttpStatus.BAD_REQUEST, "대여 일수는 1 이상의 숫자여야 합니다.");
 
     private final HttpStatus status;
     private final String message;
