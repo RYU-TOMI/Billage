@@ -182,3 +182,37 @@ DB_PASSWORD=password \
 
 > DB 비밀번호, JWT 시크릿 등은 **절대 커밋하지 마세요.** 공개 저장소입니다.
 > 환경변수로 주입하거나 `application-secret.yml`(gitignore 처리됨)에 두세요.
+
+## 배포
+
+`prod` 프로필과 `Dockerfile` 을 사용합니다.
+
+```bash
+docker build -t billage .
+docker run -p 8080:8080 --env-file .env.prod billage
+```
+
+### 필수 환경변수
+
+| 변수 | 설명 |
+| --- | --- |
+| `DB_URL` | `jdbc:mysql://호스트:3306/billage?serverTimezone=Asia/Seoul&characterEncoding=UTF-8` |
+| `DB_USERNAME` / `DB_PASSWORD` | DB 접속 정보 |
+| `JWT_SECRET` | 32바이트 이상. `openssl rand -base64 32` 로 생성 |
+| `KAKAO_CLIENT_ID` / `KAKAO_CLIENT_SECRET` | 카카오 개발자센터 발급값 |
+| `OAUTH2_REDIRECT_URI` | 로그인 후 돌아갈 프론트 주소 (예: `https://billage.site/oauth/callback`) |
+| `CORS_ALLOWED_ORIGINS` | 프론트 주소. 쉼표로 여러 개 |
+
+### 배포 전 체크리스트
+
+- [ ] 카카오 개발자센터 > **Redirect URI 에 배포 주소 추가**
+      → `https://api.billage.site/login/oauth2/code/kakao`
+      (로컬용 `http://localhost:8080/...` 은 남겨두세요)
+- [ ] 카카오 개발자센터 > 플랫폼 > Web 에 사이트 도메인 등록
+- [ ] `JWT_SECRET` 을 로컬 기본값이 아닌 값으로 교체
+- [ ] `CORS_ALLOWED_ORIGINS` 에 실제 프론트 주소 지정
+
+> **HTTPS 를 프록시(Nginx·로드밸런서·PaaS)가 처리한다면** `prod` 프로필의
+> `server.forward-headers-strategy: framework` 가 반드시 필요합니다.
+> 이게 없으면 Spring 이 자기 주소를 `http` 로 인식해 카카오에 보내는 `redirect_uri` 가
+> `http://...` 로 만들어지고, 등록된 URI 와 달라 **KOE006** 으로 로그인이 실패합니다.
