@@ -7,6 +7,8 @@ import com.billage.global.security.jwt.JwtProperties;
 import com.billage.global.security.oauth2.CustomOAuth2UserService;
 import com.billage.global.security.oauth2.OAuth2FailureHandler;
 import com.billage.global.security.oauth2.OAuth2Properties;
+import com.billage.global.security.oauth2.OAuth2RedirectUriCaptureFilter;
+import com.billage.global.security.oauth2.OAuth2RedirectUriResolver;
 import com.billage.global.security.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -32,6 +35,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final OAuth2RedirectUriResolver oAuth2RedirectUriResolver;
     private final CorsConfigurationSource corsConfigurationSource;
 
     /**
@@ -69,6 +73,10 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
+
+                // 로그인 시작 요청의 redirect_uri 를 카카오로 넘어가기 전에 챙겨둡니다.
+                .addFilterBefore(new OAuth2RedirectUriCaptureFilter(oAuth2RedirectUriResolver),
+                        OAuth2AuthorizationRequestRedirectFilter.class)
 
                 // 카카오 로그인 → CustomOAuth2UserService 로 회원 조회·생성 → 성공 핸들러가 JWT 발급
                 .oauth2Login(oauth2 -> oauth2

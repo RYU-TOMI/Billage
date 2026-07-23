@@ -25,7 +25,7 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final OAuth2Properties oAuth2Properties;
+    private final OAuth2RedirectUriResolver redirectUriResolver;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -40,7 +40,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.debug("카카오 로그인 성공: userId={}, newUser={}", userId, principal.isNewUser());
 
-        String targetUrl = UriComponentsBuilder.fromUriString(oAuth2Properties.redirectUri())
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUriResolver.resolve(request))
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
                 .queryParam("isNewUser", principal.isNewUser())
