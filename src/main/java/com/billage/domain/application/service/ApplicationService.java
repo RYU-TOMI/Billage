@@ -10,12 +10,14 @@ import com.billage.domain.credit.entity.CreditHistory;
 import com.billage.domain.credit.entity.CreditReason;
 import com.billage.domain.credit.repository.CreditHistoryRepository;
 import com.billage.domain.post.entity.Post;
+import com.billage.domain.post.entity.PostStatus;
 import com.billage.domain.post.entity.PostType;
 import com.billage.domain.post.repository.PostRepository;
 import com.billage.domain.user.entity.User;
 import com.billage.domain.user.repository.UserRepository;
 import com.billage.global.exception.BusinessException;
 import com.billage.global.exception.ErrorCode;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +44,20 @@ public class ApplicationService {
         User applicant = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        if (post.getWriter().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.WRITER_CANNOT_APPLY);
+        }
+
         if (applicationRepository.existsByPostIdAndApplicantIdAndStatus(postId, userId, ApplicationStatus.CONFIRMED)) {
             throw new BusinessException(ErrorCode.ALREADY_APPLIED);
         }
 
+        if (post.getDeadline() != null && post.getDeadline().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.DEADLINE_PASSED);
+        }
+
         long currentCount = applicationRepository.countByPostIdAndStatus(postId, ApplicationStatus.CONFIRMED);
-        if (currentCount >= post.getCapacity()) {
+        if (post.getStatus() == PostStatus.CLOSED || currentCount >= post.getCapacity()) {
             throw new BusinessException(ErrorCode.CAPACITY_EXCEEDED);
         }
 
@@ -55,10 +65,13 @@ public class ApplicationService {
         int totalPrice;
         if (post.getType() == PostType.RENTAL) {
             if (request.rentalDays() == null || request.rentalDays() <= 0) {
-                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "대여 일수는 1 이상의 숫자여야 합니다.");
+                throw new BusinessException(ErrorCode.RENTAL_DAYS_REQUIRED);
             }
             rentalDays = request.rentalDays();
-            totalPrice = post.getPrice() * rentalDays;
+            // price/rentalDays 는 각각 DTO에서 상한이 걸려 있지만, long 으로 계산해서
+            // 혹시라도 int 오버플로로 결제 금액이 음수가 되는 걸 한 번 더 막는다.
+            // (음수가 되면 크레딧 체크를 통과해 버리고, 차감이 오히려 크레딧을 늘리게 된다)
+            totalPrice = Math.toIntExact((long) post.getPrice() * rentalDays);
         } else {
             totalPrice = post.getPrice();
         }
