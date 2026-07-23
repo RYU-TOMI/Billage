@@ -114,4 +114,9 @@ public class Post extends BaseTimeEntity {
     public void close() {
         this.status = PostStatus.CLOSED;
     }
+
+    /** 참여 취소 등으로 자리가 다시 생겼을 때 호출합니다. */
+    public void open() {
+        this.status = PostStatus.OPEN;
+    }
 }
