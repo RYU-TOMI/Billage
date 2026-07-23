@@ -39,7 +39,7 @@ public class ApplicationService {
         }
 
         Post post = application.getPost();
-        int refundAmount = post.getPrice();
+        int refundAmount = application.getTotalPrice();
 
         application.cancel();
         applicant.increaseCredit(refundAmount);
