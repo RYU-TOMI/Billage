@@ -69,4 +69,19 @@ public class User extends BaseTimeEntity {
     public boolean hasCompletedOnboarding() {
         return school != null;
     }
+
+    /**
+     * 크레딧을 증가시킵니다. (충전, 참여 취소 환불 등)
+     */
+    public void increaseCredit(int amount) {
+        this.credit += amount;
+    }
+
+    /**
+     * 크레딧을 차감합니다. (참여 신청 시 결제 등)
+     * 잔액 부족 검증은 서비스 계층(ErrorCode.INSUFFICIENT_CREDIT)에서 수행합니다.
+     */
+    public void decreaseCredit(int amount) {
+        this.credit -= amount;
+    }
 }
