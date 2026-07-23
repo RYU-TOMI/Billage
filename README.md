@@ -99,9 +99,13 @@ String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 프론트 → GET /oauth2/authorization/kakao
        → 카카오 인증 화면
        → GET /login/oauth2/code/kakao?code=...   (서버가 처리)
-       → {OAUTH2_REDIRECT_URI}?accessToken=...   (성공)
-       → {OAUTH2_REDIRECT_URI}?error=social_login_failed   (실패)
+       → {OAUTH2_REDIRECT_URI}?accessToken=...&refreshToken=...&isNewUser=true   (성공)
+       → {OAUTH2_REDIRECT_URI}?error=social_login_failed                          (실패)
 ```
+
+`isNewUser=true` 면 이번에 새로 가입한 회원입니다. 다만 온보딩 화면으로 보낼지는
+`GET /api/users/me` 의 `school` 이 `null` 인지로 판단하는 게 정확합니다
+(가입만 하고 학교를 안 고른 채 이탈한 회원이 있을 수 있습니다).
 
 카카오 개발자센터에서 발급받은 값을 환경변수로 넣어야 실제 로그인이 됩니다.
 
