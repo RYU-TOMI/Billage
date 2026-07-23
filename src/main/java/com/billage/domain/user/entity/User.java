@@ -56,4 +56,17 @@ public class User extends BaseTimeEntity {
                 .school(school)
                 .build();
     }
+
+    /**
+     * 온보딩에서 학교를 설정합니다.
+     * 값이 유효한 학교인지는 서비스 계층에서 검증합니다.
+     */
+    public void updateSchool(String school) {
+        this.school = school;
+    }
+
+    /** 온보딩(학교 선택)을 마쳤는지 여부. */
+    public boolean hasCompletedOnboarding() {
+        return school != null;
+    }
 }
