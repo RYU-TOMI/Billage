@@ -4,6 +4,8 @@ import com.billage.global.security.handler.JwtAccessDeniedHandler;
 import com.billage.global.security.handler.JwtAuthenticationEntryPoint;
 import com.billage.global.security.jwt.JwtAuthenticationFilter;
 import com.billage.global.security.jwt.JwtProperties;
+import com.billage.global.security.oauth2.OAuth2FailureHandler;
+import com.billage.global.security.oauth2.OAuth2Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,12 +21,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, OAuth2Properties.class})
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final CorsConfigurationSource corsConfigurationSource;
 
     /**
@@ -33,7 +36,9 @@ public class SecurityConfig {
      */
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/health",
-            "/api/auth/**",          // 카카오 로그인, 토큰 재발급
+            "/api/auth/**",          // 로그아웃, 토큰 재발급
+            "/oauth2/**",            // 카카오 로그인 시작 (/oauth2/authorization/kakao)
+            "/login/oauth2/**",      // 카카오 콜백 (/login/oauth2/code/kakao)
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
@@ -59,6 +64,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()   // CORS preflight
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
+                )
+
+                // 카카오 로그인. 성공 처리(CustomOAuth2UserService, 성공 핸들러)는 로그인 담당자가 붙입니다.
+                .oauth2Login(oauth2 -> oauth2
+                        .failureHandler(oAuth2FailureHandler)
                 )
 
                 .exceptionHandling(handler -> handler
