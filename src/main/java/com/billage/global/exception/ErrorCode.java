@@ -51,8 +51,6 @@ public enum ErrorCode {
     NOT_POST_WRITER(HttpStatus.FORBIDDEN, "게시글 작성자만 가능한 작업입니다."),
     /** type 이 GROUP_BUY 인데 deadline 이 없는 경우 (DB 는 NULL 허용, 서비스에서 검증) */
     DEADLINE_REQUIRED(HttpStatus.BAD_REQUEST, "공동구매는 마감일이 필요합니다."),
-    /** type 이 RENTAL 인데 rentalPeriod 가 없는 경우 (DB 는 NULL 허용, 서비스에서 검증) */
-    RENTAL_PERIOD_REQUIRED(HttpStatus.BAD_REQUEST, "대여 게시글은 대여 기간이 필요합니다."),
 
     // ===== Image =====
     INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "올바른 이미지 파일이 아닙니다."),
