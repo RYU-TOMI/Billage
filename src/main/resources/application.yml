@@ -17,6 +17,21 @@ spring:
     time-zone: Asia/Seoul
     default-property-inclusion: always
 
+jwt:
+  # 운영에서는 반드시 환경변수 JWT_SECRET 으로 덮어쓰세요. (아래 기본값은 로컬 개발 전용)
+  secret: ${JWT_SECRET:billage-local-dev-secret-key-do-not-use-in-production-32bytes}
+  access-token-validity: 3600000        # 1시간
+  refresh-token-validity: 1209600000    # 14일
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
 server:
   port: 8080
   servlet:

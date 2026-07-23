@@ -17,6 +17,8 @@ Billage는 대학생을 위한 생활 공유 플랫폼입니다.
 | 빌드 도구 | Gradle (Wrapper 포함) |
 | ORM | Spring Data JPA |
 | DB | MySQL (운영) / H2 (로컬) |
+| 인증 | Spring Security + JWT (jjwt 0.12.7) |
+| API 문서 | Swagger (springdoc-openapi 3.0.3) |
 | 기타 | Lombok, Bean Validation |
 
 > ⚠️ Spring Boot **4.x** 입니다. 3.x와 의존성 이름이 다릅니다 (`spring-boot-starter-web` → `spring-boot-starter-webmvc`). 튜토리얼의 `build.gradle`을 그대로 복사하지 마세요.
@@ -31,7 +33,16 @@ src/main/java/com/billage/
     │   ├── response/ApiResponse.java      공통 응답 포맷
     │   ├── entity/BaseTimeEntity.java     created_at / updated_at 자동 관리
     │   └── controller/HealthController.java
-    ├── config/JpaAuditingConfig.java
+    ├── config/
+    │   ├── JpaAuditingConfig.java
+    │   ├── SecurityConfig.java            인증 경로 규칙
+    │   ├── CorsConfig.java
+    │   └── SwaggerConfig.java
+    ├── security/
+    │   ├── AuthUser.java                  로그인한 유저 정보
+    │   ├── jwt/JwtTokenProvider.java      토큰 발급·검증
+    │   ├── jwt/JwtAuthenticationFilter.java
+    │   └── handler/                       401 / 403 응답
     └── exception/
         ├── ErrorCode.java                 에러 코드 enum
         ├── BusinessException.java
@@ -54,6 +65,39 @@ src/main/java/com/billage/
 
 서비스 로직에서 `throw new BusinessException(ErrorCode.POST_NOT_FOUND)` 를 던지면
 `GlobalExceptionHandler`가 위 형식과 알맞은 HTTP 상태 코드로 변환합니다.
+
+## 인증
+
+`/api/auth/**` 와 `/api/health` 를 제외한 모든 API는 인증이 필요합니다.
+요청 헤더에 `Authorization: Bearer {accessToken}` 을 담아 보내면 됩니다.
+
+**컨트롤러에서 로그인한 유저 꺼내기**
+
+```java
+@GetMapping("/posts/mine")
+public ApiResponse<List<PostResponse>> myPosts(@AuthenticationPrincipal AuthUser authUser) {
+    Long userId = authUser.getUserId();
+    ...
+}
+```
+
+**토큰 발급** (로그인 담당자용)
+
+```java
+String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+```
+
+인증 없이 열어야 할 경로가 생기면 `SecurityConfig.PUBLIC_ENDPOINTS` 에 추가하세요.
+
+> `jwt.secret` 의 기본값은 **로컬 개발 전용**입니다. 배포 시 반드시 환경변수 `JWT_SECRET` 으로 덮어쓰세요.
+
+## API 문서 (Swagger)
+
+서버 실행 후 http://localhost:8080/swagger-ui.html
+
+인증이 필요한 API를 테스트하려면 우측 상단 **Authorize** 버튼을 눌러 액세스 토큰을 입력하세요
+(`Bearer ` 는 빼고 토큰 값만 붙여넣습니다).
 
 ## 주요 기능
 
@@ -96,6 +140,7 @@ cd Billage
 
 - 서버: http://localhost:8080
 - 헬스체크: http://localhost:8080/api/health
+- Swagger UI: http://localhost:8080/swagger-ui.html
 - H2 콘솔: http://localhost:8080/h2-console
   (JDBC URL `jdbc:h2:mem:billage;MODE=MySQL;DB_CLOSE_DELAY=-1`, User `sa`, 비밀번호 없음)
 
