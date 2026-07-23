@@ -36,6 +36,8 @@ services:
     working_dir: /app
     volumes:
       - ./app.jar:/app/app.jar:ro
+      # 업로드된 이미지 보관. 볼륨이 없으면 재배포(컨테이너 재생성)마다 전부 사라집니다.
+      - uploads-data:/data/uploads
     # 메모리 1.9GB 를 MySQL 과 나눠 쓰므로 힙을 제한합니다.
     command: ["java", "-Xmx512m", "-jar", "/app/app.jar"]
     environment:
@@ -48,6 +50,7 @@ services:
       KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
       OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      UPLOAD_DIR: /data/uploads
       TZ: Asia/Seoul
     depends_on:
       mysql:
@@ -72,3 +75,4 @@ volumes:
   mysql-data:
   caddy-data:
   caddy-config:
+  uploads-data:     # 업로드 이미지. 인스턴스를 지우면 함께 사라집니다 (mysql-data 와 동일)
