@@ -5,13 +5,17 @@ import com.billage.domain.credit.dto.response.CreditHistoryResponse;
 import com.billage.domain.credit.dto.response.CreditResponse;
 import com.billage.domain.credit.service.CreditService;
 import com.billage.global.common.response.ApiResponse;
+import com.billage.global.common.response.PageResponse;
 import com.billage.global.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +38,7 @@ public class CreditController {
     }
 
     @GetMapping("/history")
-    public ApiResponse<CreditHistoryResponse.PageResponse> getHistory(
+    public ApiResponse<PageResponse<CreditHistoryResponse>> getHistory(
             @AuthenticationPrincipal AuthUser authUser,
             Pageable pageable
     ) {
