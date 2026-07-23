@@ -4,8 +4,10 @@ import com.billage.global.security.handler.JwtAccessDeniedHandler;
 import com.billage.global.security.handler.JwtAuthenticationEntryPoint;
 import com.billage.global.security.jwt.JwtAuthenticationFilter;
 import com.billage.global.security.jwt.JwtProperties;
+import com.billage.global.security.oauth2.CustomOAuth2UserService;
 import com.billage.global.security.oauth2.OAuth2FailureHandler;
 import com.billage.global.security.oauth2.OAuth2Properties;
+import com.billage.global.security.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final CorsConfigurationSource corsConfigurationSource;
 
@@ -66,8 +70,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 카카오 로그인. 성공 처리(CustomOAuth2UserService, 성공 핸들러)는 로그인 담당자가 붙입니다.
+                // 카카오 로그인 → CustomOAuth2UserService 로 회원 조회·생성 → 성공 핸들러가 JWT 발급
                 .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler)
                 )
 

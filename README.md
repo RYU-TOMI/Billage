@@ -99,9 +99,13 @@ String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 프론트 → GET /oauth2/authorization/kakao
        → 카카오 인증 화면
        → GET /login/oauth2/code/kakao?code=...   (서버가 처리)
-       → {OAUTH2_REDIRECT_URI}?accessToken=...   (성공)
-       → {OAUTH2_REDIRECT_URI}?error=social_login_failed   (실패)
+       → {OAUTH2_REDIRECT_URI}?accessToken=...&refreshToken=...&isNewUser=true   (성공)
+       → {OAUTH2_REDIRECT_URI}?error=social_login_failed                          (실패)
 ```
+
+`isNewUser=true` 면 이번에 새로 가입한 회원입니다. 다만 온보딩 화면으로 보낼지는
+`GET /api/users/me` 의 `school` 이 `null` 인지로 판단하는 게 정확합니다
+(가입만 하고 학교를 안 고른 채 이탈한 회원이 있을 수 있습니다).
 
 카카오 개발자센터에서 발급받은 값을 환경변수로 넣어야 실제 로그인이 됩니다.
 
@@ -111,9 +115,23 @@ KAKAO_CLIENT_SECRET=...    # 보안 > Client Secret
 OAUTH2_REDIRECT_URI=http://localhost:5173/oauth/callback
 ```
 
-카카오 개발자센터에 **Redirect URI 를 `http://localhost:8080/login/oauth2/code/kakao` 로 등록**해야 하고,
-동의항목(`profile_nickname`, `profile_image`, `account_email`)도 활성화해야 합니다.
-`account_email` 은 선택 동의라 사용자가 거부하면 이메일이 넘어오지 않습니다.
+카카오 개발자센터에 **Redirect URI 를 `http://localhost:8080/login/oauth2/code/kakao` 로 등록**해야 합니다.
+
+**동의항목**은 `profile_nickname`, `profile_image`, `account_email` 을 요청합니다.
+개발자센터의 동의항목에서 **켜두지 않은 항목을 요청하면 로그인 시 `KOE205`** 로 실패합니다.
+`account_email` 은 선택 동의라 사용자가 거부하면 `User.email` 이 `null` 로 저장됩니다.
+
+요청 항목을 바꾸려면 환경변수로 덮어쓰면 됩니다.
+
+```bash
+KAKAO_SCOPE=profile_nickname,profile_image
+```
+
+`.env` 에 키를 넣어뒀다면 Spring Boot 는 `.env` 를 자동으로 읽지 않으므로 셸에서 주입해야 합니다.
+
+```bash
+set -a && . ./.env && set +a && ./gradlew bootRun
+```
 
 인증 없이 열어야 할 경로가 생기면 `SecurityConfig.PUBLIC_ENDPOINTS` 에 추가하세요.
 
