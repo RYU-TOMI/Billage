@@ -19,9 +19,10 @@ spring:
 
   servlet:
     multipart:
-      # 기본값이 1MB 라 휴대폰 사진이 그대로 걸립니다.
-      max-file-size: 10MB
-      max-request-size: 12MB
+      # ImageService 의 실제 검증 상한(5MB)과 맞춥니다. 여기가 더 크면 상한을
+      # 넘는 파일도 서버가 일단 파싱(메모리/임시디스크 사용)한 뒤에야 거부하게 됩니다.
+      max-file-size: 5MB
+      max-request-size: 6MB
 
   # 카카오는 스프링 시큐리티 기본 제공 provider 가 아니라 provider 설정까지 직접 적어야 합니다.
   # client-id / client-secret 은 카카오 개발자센터에서 발급받아 환경변수로 주입하세요.
