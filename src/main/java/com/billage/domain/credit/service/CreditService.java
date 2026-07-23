@@ -10,6 +10,7 @@ import com.billage.domain.credit.entity.CreditReason;
 import com.billage.domain.credit.repository.CreditHistoryRepository;
 import com.billage.domain.user.entity.User;
 import com.billage.domain.user.repository.UserRepository;
+import com.billage.global.common.response.PageResponse;
 import com.billage.global.exception.BusinessException;
 import com.billage.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +49,10 @@ public class CreditService {
         return CreditResponse.from(user.getCredit());
     }
 
-    /** GET /api/users/me/credit/history?page=  creditHistory 최신순으로 정렬
-     페이지를 조회한 뒤, 엔티티를 응답용 dto로 바꾸는 변환과정 코드 **/
-    public CreditHistoryResponse.PageResponse getHistory(Long userId, Pageable pageable) {
-        Page<CreditHistory> page =
-                creditHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
-        return CreditHistoryResponse.PageResponse.from(page);
+    /** GET /api/users/me/credit/history?page= creditHistory 최신순으로 정렬 */
+    public PageResponse<CreditHistoryResponse> getHistory(Long userId, Pageable pageable) {
+        Page<CreditHistory> page = creditHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        return PageResponse.from(page.map(CreditHistoryResponse::from));
     }
 
     /**유저 못찾으면 에러 발생 **/

@@ -7,10 +7,10 @@ import com.billage.domain.post.entity.PostCategory;
 import com.billage.domain.post.entity.PostType;
 import com.billage.domain.post.service.PostService;
 import com.billage.global.common.response.ApiResponse;
+import com.billage.global.common.response.PageResponse;
 import com.billage.global.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -39,16 +39,18 @@ public class PostController {
     }
 
     @GetMapping
-    public ApiResponse<Page<PostSummaryResponse>> getPosts(@RequestParam(required = false) PostType type,
-                                                             @RequestParam(required = false) PostCategory category,
-                                                             @PageableDefault(size = 20) Pageable pageable) {
+    public ApiResponse<PageResponse<PostSummaryResponse>> getPosts(@RequestParam(required = false) PostType type,
+                                                                     @RequestParam(required = false) PostCategory category,
+                                                                     @PageableDefault(size = 20) Pageable pageable) {
         return ApiResponse.success(postService.getPosts(type, category, pageable));
     }
 
     @GetMapping("/search")
-    public ApiResponse<Page<PostSummaryResponse>> searchPosts(@RequestParam String keyword,
-                                                                @PageableDefault(size = 20) Pageable pageable) {
-        return ApiResponse.success(postService.searchPosts(keyword, pageable));
+    public ApiResponse<PageResponse<PostSummaryResponse>> searchPosts(@RequestParam String keyword,
+                                                                        @RequestParam(required = false) PostType type,
+                                                                        @RequestParam(required = false) PostCategory category,
+                                                                        @PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(postService.searchPosts(keyword, type, category, pageable));
     }
 
     @GetMapping("/{postId}")

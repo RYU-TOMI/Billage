@@ -9,10 +9,10 @@ import com.billage.domain.post.entity.PostType;
 import com.billage.domain.post.repository.PostRepository;
 import com.billage.domain.user.entity.User;
 import com.billage.domain.user.repository.UserRepository;
+import com.billage.global.common.response.PageResponse;
 import com.billage.global.exception.BusinessException;
 import com.billage.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +27,10 @@ public class PostService {
 
     @Transactional
     public PostResponse createPost(Long writerId, PostCreateRequest request) {
+        validateTypeSpecificFields(request);
+
         User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        validateTypeSpecificFields(request);
 
         Integer capacity = request.type() == PostType.RENTAL ? 1 : request.capacity();
 
@@ -57,14 +57,15 @@ public class PostService {
         return PostResponse.from(post);
     }
 
-    public Page<PostSummaryResponse> getPosts(PostType type, PostCategory category, Pageable pageable) {
-        return postRepository.findAllByFilter(type, category, pageable)
-                .map(PostSummaryResponse::from);
+    public PageResponse<PostSummaryResponse> getPosts(PostType type, PostCategory category, Pageable pageable) {
+        return PageResponse.from(postRepository.findAllByFilter(type, category, pageable)
+                .map(PostSummaryResponse::from));
     }
 
-    public Page<PostSummaryResponse> searchPosts(String keyword, Pageable pageable) {
-        return postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable)
-                .map(PostSummaryResponse::from);
+    public PageResponse<PostSummaryResponse> searchPosts(String keyword, PostType type, PostCategory category,
+                                                           Pageable pageable) {
+        return PageResponse.from(postRepository.search(keyword, type, category, pageable)
+                .map(PostSummaryResponse::from));
     }
 
     /** GROUP_BUY 는 deadline 이 필수입니다. (DB 는 NULL 허용, 여기서만 검증) */
